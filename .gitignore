@@ -1,0 +1,24 @@
+# Rust build artifacts
+/target/
+/debug/
+/release/
+
+# Cargo build artifacts
+**/*.rs.bk
+*.pdb
+
+# IDE and editor files
+.idea/
+.vscode/
+.claude/settings.local.json
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Dependency directories
+Cargo.lock.bak
+
+# Test coverage
+*.profraw
+*.profdata
