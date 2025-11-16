@@ -130,6 +130,15 @@ impl ZellijPlugin for State {
             eprintln!("[zellij-notify]   Source: {:?}", pipe_message.source);
             eprintln!("[zellij-notify]   Args: {:?}", pipe_message.args);
             eprintln!("[zellij-notify]   Is Private: {}", pipe_message.is_private);
+
+            // Log session_name and tab_name if provided
+            if let Some(session_name) = pipe_message.args.get("session_name") {
+                eprintln!("[zellij-notify]   Session name: {}", session_name);
+            }
+            if let Some(tab_name) = pipe_message.args.get("tab_name") {
+                eprintln!("[zellij-notify]   Tab name: {}", tab_name);
+            }
+
             eprintln!("[zellij-notify]   Currently focused tab: {:?}", self.focused_tab_position);
             eprintln!("[zellij-notify]   All tabs at pipe time:");
             for tab in &self.all_tabs {
@@ -264,16 +273,18 @@ fn remove_trailing_emojis(name: &str) -> String {
         let original_len = cleaned.len();
         cleaned = cleaned.trim_end().to_string();
 
-        // Try to remove any trailing emoji
+        // Try to remove any trailing emoji (check all emojis, don't break early)
+        let mut found_emoji = false;
         for emoji in emojis {
             if cleaned.ends_with(emoji) {
                 cleaned = cleaned[..cleaned.len() - emoji.len()].to_string();
-                break;
+                found_emoji = true;
+                break; // Found one, now trim again and recheck from the start
             }
         }
 
-        // If nothing changed, we're done
-        if cleaned.len() == original_len {
+        // If nothing changed (no whitespace trimmed, no emoji removed), we're done
+        if !found_emoji && cleaned.len() == original_len {
             break;
         }
     }

@@ -3652,7 +3652,7 @@ dependencies = [
 
 [[package]]
 name = "zellij-notify"
-version = "0.1.42"
+version = "0.1.49"
 dependencies = [
  "serde",
  "serde_json",

@@ -1,3 +1,6 @@
+# My Stuff
+.worktrees
+
 # Rust build artifacts
 /target/
 /debug/

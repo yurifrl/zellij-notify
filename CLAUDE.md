@@ -76,17 +76,19 @@ target/wasm32-wasip1/release/zellij_notify.wasm
 5. This allows the plugin to update the correct tab even if the user has switched tabs
 
 #### Pipe Message Flow (Emoji Addition)
-1. User runs command: `zellij pipe -n "notify" -a "pane_id=$ZELLIJ_PANE_ID" "stop"`
+1. User runs command: `zellij pipe -n "notify" -a "pane_id=$ZELLIJ_PANE_ID" -a "session_name=$ZELLIJ_SESSION_NAME" -a "tab_name=$ZELLIJ_TAB_NAME" "stop"`
 2. Plugin receives `PipeMessage` with:
    - `name: "notify"`
    - `payload: "stop"` (the preset key)
-   - `args: {"pane_id": "123"}` (from the `-a` flag)
+   - `args: {"pane_id": "123", "session_name": "my-session", "tab_name": "my-tab"}` (from the `-a` flags)
 3. Plugin tries three methods to identify the target tab (in order):
    - **Method 1**: If `pane_id` in args → search `PaneManifest` to find which tab contains this pane (MOST RELIABLE)
-   - **Method 2**: If `tab_position` in args → use explicit position
+   - **Method 2**: If `tab_position` in args → use explicit position (0-indexed)
    - **Method 3**: Use currently focused tab (UNRELIABLE for background commands)
 4. Plugin looks up emoji from presets (or uses default ✅)
 5. Plugin renames the identified tab: `rename_tab(position + 1, clean_name + emoji)`
+
+**Note**: The `session_name` and `tab_name` arguments are accepted and logged for debugging purposes (not used for tab identification).
 
 ### Important Gotchas
 
@@ -123,6 +125,9 @@ Appends emoji to identified tab using Zellij's `pipe()` method.
 ```bash
 # Direct command - always pass pane_id for background commands!
 zellij pipe -n "notify" -a "pane_id=$ZELLIJ_PANE_ID" "stop"
+
+# With session_name and tab_name for logging/debugging
+zellij pipe -n "notify" -a "pane_id=$ZELLIJ_PANE_ID" -a "session_name=$ZELLIJ_SESSION_NAME" -a "tab_name=$ZELLIJ_TAB_NAME" "stop"
 
 # Works with background commands
 sleep 5 && zellij pipe -n "notify" -a "pane_id=$ZELLIJ_PANE_ID" "stop"
@@ -173,6 +178,8 @@ plugin location="file:/path/to/zellij-notify.wasm" {
 1. **Pane ID method** (most reliable): Pass `pane_id` via `-a` flag, plugin uses `PaneManifest` to find which tab contains that pane
 2. **Explicit position method**: Pass `tab_position` via `-a` flag (0-indexed)
 3. **Fallback method**: Use currently focused tab (unreliable for background commands)
+
+**Additional arguments**: The `session_name` and `tab_name` arguments are accepted and logged for debugging purposes but not used for tab identification.
 
 ### Integration
 
